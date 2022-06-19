@@ -21,7 +21,9 @@ let cTime = 0;
 let resetting = false;
 let wholeLoop = true;
 let header_ct = 0;
-// リップシンク用の変数達
+// リップシンク用の変数と定数
+const states = {OPEN: 1, CLOSE: 2, HALF: 3};
+let imgState = states.CLOSE;
 let context = null;
 let source = null;
 let analyser = null;
@@ -74,12 +76,22 @@ const webAudioSetup = () => {
 };
 // スペクトルをもとにリップシンクを行う
 const syncLip = (spectrums) => {
+	let imgName;
 	const totalSpectrum = spectrums.reduce(function(a, x) { return a + x });
-	let imgName = "mouth_close.png";
 	if (totalSpectrum > prevSpec) {
-		imgName = "mouth_open.png";
-	} else if (prevSpec - totalSpectrum < 500 && prevSpec - totalSpectrum > 0) {
-		imgName = "mouth_open_light.png";
+		imgState = states.OPEN;
+	} else {
+		imgState = (imgState == states.OPEN) ? states.HALF : states.CLOSE;
+	}
+	switch (imgState) {
+		case states.OPEN:
+			imgName = 'mouth_open.png';
+			break;
+		case states.HALF:
+			imgName = 'mouth_open_light.png';
+			break;
+		default:
+			imgName = 'mouth_close.png';
 	}
 	$("img#mouth").attr("src", `./image/${imgName}`);
 	prevSpec = totalSpectrum;
