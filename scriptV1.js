@@ -38,6 +38,7 @@ let minus = 0;
 // ストリーミング
 let isStreaming = false;
 let urls = null;
+let hls = null;
 
 player.preload = "metadata";
 
@@ -137,7 +138,18 @@ const start = (ct) => {
 	}
 	if (isStreaming) {
 		player.crossOrigin = 'anonymous';
-		player.src = urls[ct];
+		let isHLSPlaylist = urls[ct].split('.').pop().startsWith('m3u');
+		if (isHLSPlaylist && !player.canPlayType('application/vnd.apple.mpegurl')) {
+			if (Hls.isSupported()) {
+				if(!hls) { hls = new Hls(); }
+				hls.loadSource(urls[ct]);
+				hls.attachMedia(player);
+			} else {
+				alert("Hls.js is not supported.");
+			}
+		} else {
+			player.src = urls[ct];
+		}
 		tmp();
 	} else if ($("li.playing").prop("MData")) {
 		player.src = $("li.playing").prop("MData");
