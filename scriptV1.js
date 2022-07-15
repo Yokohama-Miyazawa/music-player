@@ -39,6 +39,7 @@ let minus = 0;
 let isStreaming = false;
 let urls = null;
 let hls = null;
+let isPlayingHlsJsNow = false;
 
 player.preload = "metadata";
 
@@ -123,6 +124,11 @@ const start = (ct) => {
 			syncLip(spectrums);
 		}, 100);
 	};
+	if(isPlayingHlsJsNow){
+		hls.destroy();
+		hls = null;
+		isPlayingHlsJsNow = false;
+	}
 	// ロードより先にやっておきたいと
 	count = ct;
 	$("li").css("border", "1px dotted #000").removeClass("playing")
@@ -144,6 +150,7 @@ const start = (ct) => {
 				if(!hls) { hls = new Hls(); }
 				hls.loadSource(urls[ct]);
 				hls.attachMedia(player);
+				isPlayingHlsJsNow = true;
 			} else {
 				alert("Hls.js is not supported.");
 			}
